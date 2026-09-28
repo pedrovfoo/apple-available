@@ -7,8 +7,8 @@ on:
   # No schedule: the checker currently runs locally every minute, and a
   # cloud run would keep its own cached state -- duplicate alerts and a
   # second heartbeat message. Re-enable this when local polling stops.
-  #  schedule:
-  #    - cron: '*/15 * * * *'
+  schedule:
+   - cron: '*/5 * * * *'
   workflow_dispatch:
 
 # Never let two checks run at once: they would race on the cached state and
