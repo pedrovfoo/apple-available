@@ -198,7 +198,8 @@ def parse_pickup(payload: dict, products: dict[str, Product]) -> dict[str, PartA
             continue
         addr = raw.get("address") or {}
         for part, info in avail.items():
-            if part not in found:
+            if part not in found or (part != "MJQ34LL/A" and "christiana" not in normalize(raw.get("storeName") or "").lower()):
+
                 continue
             if (info or {}).get("pickupDisplay") != "available":
                 continue
