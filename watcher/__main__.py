@@ -14,6 +14,7 @@ from watcher.config import load_config, ConfigError
 ROOT = Path(__file__).resolve().parent.parent
 STATE_PATH = ROOT / "state.json"
 CONFIG_PATH = ROOT / "config.toml"
+INCOMPLETE_TTL_MINUTES = 30
 log = logging.getLogger("watcher")
 
 
@@ -43,7 +44,11 @@ def refresh_products(cfg, st, session):
     fresh = False
     if fetched:
         age = datetime.now(timezone.utc) - datetime.fromisoformat(fetched)
-        fresh = age < timedelta(hours=cfg.discovery_ttl_hours)
+        # A discovery that missed some targets is retried sooner, so a model
+        # that was not on sale yet gets picked up within the hour.
+        ttl = (timedelta(minutes=INCOMPLETE_TTL_MINUTES) if st.get("missing_targets")
+               else timedelta(hours=cfg.discovery_ttl_hours))
+        fresh = age < ttl
     if st.get("watch_fingerprint") != fingerprint:
         log.info("watch configuration changed; rediscovering parts")
         fresh = False
@@ -54,12 +59,24 @@ def refresh_products(cfg, st, session):
     log.info("refreshing product list from the buy page")
     products = apple.discover_products(apple.fetch_buy_page(session))
     watched: list[apple.Product] = []
+    missing: list[str] = []
     for target in cfg.watch:
-        found = apple.select_watched(
-            products, target.model, target.capacity, target.colors
-        )
+        # One target that Apple does not list (yet) must not take the others
+        # down with it; it is reported in the heartbeat instead.
+        try:
+            found = apple.select_watched(
+                products, target.model, target.capacity, target.colors
+            )
+        except apple.DiscoveryError as exc:
+            log.warning("skipping target %s: %s", target, exc)
+            missing.append(str(target))
+            continue
         log.info("target %s -> %d parts", target, len(found))
         watched.extend(found)
+    if not watched:
+        raise apple.DiscoveryError(
+            "none of the watch targets matched any product; watching nothing is a bug"
+        )
     # Dedupe: overlapping targets must not queue a part twice.
     watched = list({p.part: p for p in watched}.values())
     canary = next((p for p in products if p.part == cfg.canary_part), None)
@@ -71,6 +88,7 @@ def refresh_products(cfg, st, session):
     st["products"] = {p.part: {"name": p.name, "price": p.price} for p in chosen.values()}
     st["products_fetched_at"] = datetime.now(timezone.utc).isoformat()
     st["watch_fingerprint"] = fingerprint
+    st["missing_targets"] = missing
 
     # Parts that left the watch list must not linger in state as stale entries.
     for gone in set(st.get("parts", {})) - set(chosen):
@@ -85,7 +103,8 @@ def update_heartbeat(tg, st, results, canary, cfg, alerted: bool, dry_run: bool)
     """Keep a single message in the chat showing the last check time, editing
     it in place so being alive costs no notifications."""
     text = notify.format_heartbeat(
-        results, cfg.zip, datetime.now().astimezone(), canary
+        results, cfg.zip, datetime.now().astimezone(), canary,
+        missing=st.get("missing_targets") or [],
     )
     if dry_run:
         print(text + "\n" + "-" * 50)

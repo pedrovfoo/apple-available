@@ -12,9 +12,14 @@ def _cfg(tmp_path):
 def test_loads_all_fields(tmp_path):
     cfg = load_config(_cfg(tmp_path),
                       {"TELEGRAM_BOT_TOKEN": "tok", "TELEGRAM_CHAT_ID": "-1004333816460"})
-    assert cfg.zip == "33130"
+    assert cfg.zip == "19702"
     assert [(w.model, w.capacity, w.colors) for w in cfg.watch] == [
         ("iPhone 18 Pro Max", "256GB", ["*"]),
+        ("iPhone 18 Pro Max", "1TB", ["Burgundy"]),
+        ("iPhone Duo", "256GB", ["*"]),
+        ("iPhone Duo", "512GB", ["*"]),
+        ("iPhone Duo", "1TB", ["*"]),
+        ("iPhone Duo", "2TB", ["*"]),
     ]
     assert cfg.canary_part == "MJQ34LL/A"
     assert cfg.chat_id == "-1004333816460"

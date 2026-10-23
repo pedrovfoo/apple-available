@@ -3,6 +3,31 @@ model = "iPhone 18 Pro Max"
 capacity = "256GB"
 colors = ["*"]
 
+[[watch]]
+model = "iPhone 18 Pro Max"
+capacity = "1TB"
+colors = ["Burgundy"]
+
+[[watch]]
+model = "iPhone Duo"
+capacity = "256GB"
+colors = ["*"]
+
+[[watch]]
+model = "iPhone Duo"
+capacity = "512GB"
+colors = ["*"]
+
+[[watch]]
+model = "iPhone Duo"
+capacity = "1TB"
+colors = ["*"]
+
+[[watch]]
+model = "iPhone Duo"
+capacity = "2TB"
+colors = ["*"]
+
 [location]
 zip = "19702"
 

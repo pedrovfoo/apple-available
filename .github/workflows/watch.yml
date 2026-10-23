@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
-      TZ: America/Sao_Paulo
+      TZ: America/New_York
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
@@ -48,8 +48,10 @@ jobs:
           key: watcher-state-${{ github.run_id }}
           restore-keys: watcher-state-
 
+      # The trap makes "Cancel workflow" work: without it the loop swallows
+      # the stop signal along with the check's own failures.
       - name: Check availability
-        run: for i in $(seq 1 300); do python -m watcher --no-jitter || true; sleep 50; done
+        run: trap 'exit 130' INT TERM; for i in $(seq 1 300); do python -m watcher --no-jitter || true; sleep 50; done
 
 
       - name: Save state

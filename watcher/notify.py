@@ -6,7 +6,13 @@ import requests
 log = logging.getLogger(__name__)
 
 BUY_URL = "https://www.apple.com/shop/buy-iphone/iphone-18-pro"
+DUO_BUY_URL = "https://www.apple.com/shop/buy-iphone/iphone-duo"
 MAX_STORES_LISTED = 10
+
+
+def buy_url_for(name: str) -> str:
+    """The buy page an alert should link to, so it opens on the right model."""
+    return DUO_BUY_URL if "iphone duo" in name.lower() else BUY_URL
 
 
 def format_available(res, zip_code: str, repeat: bool = False) -> str:
@@ -20,12 +26,12 @@ def format_available(res, zip_code: str, repeat: bool = False) -> str:
             lines.append(f"  {s.quote}")
     if res.store_count > MAX_STORES_LISTED:
         lines.append(f"…and {res.store_count - MAX_STORES_LISTED} more")
-    lines += ["", BUY_URL]
+    lines += ["", buy_url_for(res.name)]
     return "\n".join(lines)
 
 
 def format_heartbeat(results, zip_code: str, now, canary=None,
-                     interval_minutes: int = 3) -> str:
+                     interval_minutes: int = 1, missing=()) -> str:
     """The message that is edited in place each run, so the group shows a
     live 'last checked' without a new notification every few minutes."""
     lines = [
@@ -39,6 +45,8 @@ def format_heartbeat(results, zip_code: str, now, canary=None,
             lines.append(f"✅ {r.name} — *{r.store_count} {noun}*")
         else:
             lines.append(f"▫️ {r.name} — none")
+    for target in missing:
+        lines.append(f"⚠️ {target} — not found on Apple's site")
     lines.append("")
     if canary is not None:
         state = f"{canary.store_count} stores ✓" if canary.available else "0 ⚠️"

@@ -11,6 +11,12 @@ import requests
 log = logging.getLogger(__name__)
 
 BUY_PAGE = "https://www.apple.com/shop/buy-iphone/iphone-18-pro"
+# Every buy page whose products we can watch. Each model family lives on its
+# own page, so a new family means a new entry here.
+BUY_PAGES = (
+    BUY_PAGE,
+    "https://www.apple.com/shop/buy-iphone/iphone-duo",
+)
 PICKUP_URL = "https://www.apple.com/shop/retail/pickup-message"
 USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
@@ -163,7 +169,26 @@ def _get(url: str, params: dict | None, session: requests.Session) -> requests.R
 
 
 def fetch_buy_page(session: requests.Session | None = None) -> str:
-    return _get(BUY_PAGE, None, session or _session()).text
+    """All buy pages joined into one blob for discover_products().
+
+    A page that fails to load is skipped with a warning as long as another
+    one loaded, so a problem with one model's page cannot stop the watch on
+    the others. A rate limit is never swallowed: it applies to every page.
+    """
+    session = session or _session()
+    pages: list[str] = []
+    last: Exception | None = None
+    for url in BUY_PAGES:
+        try:
+            pages.append(_get(url, None, session).text)
+        except RateLimited:
+            raise
+        except TransientError as exc:
+            last = exc
+            log.warning("buy page %s could not be loaded: %s", url, exc)
+    if not pages:
+        raise TransientError(f"no buy page could be loaded: {last}")
+    return "\n".join(pages)
 
 
 def fetch_pickup(
