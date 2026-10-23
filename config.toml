@@ -5,6 +5,11 @@ colors = ["*"]
 
 [[watch]]
 model = "iPhone 18 Pro Max"
+capacity = "512GB"
+colors = ["Burgundy"]
+
+[[watch]]
+model = "iPhone 18 Pro Max"
 capacity = "1TB"
 colors = ["Burgundy"]
 

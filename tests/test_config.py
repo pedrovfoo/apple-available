@@ -15,6 +15,7 @@ def test_loads_all_fields(tmp_path):
     assert cfg.zip == "19702"
     assert [(w.model, w.capacity, w.colors) for w in cfg.watch] == [
         ("iPhone 18 Pro Max", "256GB", ["*"]),
+        ("iPhone 18 Pro Max", "512GB", ["Burgundy"]),
         ("iPhone 18 Pro Max", "1TB", ["Burgundy"]),
         ("iPhone Duo", "256GB", ["*"]),
         ("iPhone Duo", "512GB", ["*"]),
