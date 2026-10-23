@@ -1,37 +1,34 @@
-[[watch]]
-model = "iPhone 18 Pro Max"
-capacity = "256GB"
-colors = ["*"]
-
-[[watch]]
-model = "iPhone 18 Pro Max"
-capacity = "512GB"
-colors = ["Burgundy"]
-
-[[watch]]
-model = "iPhone 18 Pro Max"
-capacity = "1TB"
-colors = ["Burgundy"]
+# Shopping list. Star White = branco, Night Sky = preto.
 
 [[watch]]
 model = "iPhone Duo"
 capacity = "256GB"
-colors = ["*"]
+colors = ["Star White", "Night Sky"]
 
 [[watch]]
 model = "iPhone Duo"
 capacity = "512GB"
-colors = ["*"]
-
-[[watch]]
-model = "iPhone Duo"
-capacity = "1TB"
-colors = ["*"]
+colors = ["Star White"]
 
 [[watch]]
 model = "iPhone Duo"
 capacity = "2TB"
-colors = ["*"]
+colors = ["Star White"]
+
+[[watch]]
+model = "iPhone 18 Pro Max"
+capacity = "512GB"
+colors = ["Burgundy"]
+
+[[watch]]
+model = "iPhone 18 Pro Max"
+capacity = "1TB"
+colors = ["Burgundy"]
+
+[[watch]]
+model = "iPhone 18 Pro"
+capacity = "512GB"
+colors = ["Burgundy"]
 
 [location]
 zip = "19702"
